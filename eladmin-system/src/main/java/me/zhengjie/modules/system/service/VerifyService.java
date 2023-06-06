@@ -27,9 +27,10 @@ public interface VerifyService {
      * 发送验证码
      * @param email /
      * @param key /
+     * @param description
      * @return /
      */
-    EmailVo sendEmail(String email, String key);
+    EmailVo sendEmail(String email, String key, String description);
 
 
     /**

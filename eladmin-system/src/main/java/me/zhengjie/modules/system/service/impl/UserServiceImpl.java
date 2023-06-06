@@ -15,6 +15,8 @@
  */
 package me.zhengjie.modules.system.service.impl;
 
+import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.util.StrUtil;
 import lombok.RequiredArgsConstructor;
 import me.zhengjie.config.FileProperties;
 import me.zhengjie.exception.BadRequestException;
@@ -29,10 +31,14 @@ import me.zhengjie.modules.system.service.dto.*;
 import me.zhengjie.modules.system.service.mapstruct.UserLoginMapper;
 import me.zhengjie.modules.system.service.mapstruct.UserMapper;
 import me.zhengjie.utils.*;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -59,6 +65,9 @@ public class UserServiceImpl implements UserService {
     private final UserCacheManager userCacheManager;
     private final OnlineUserService onlineUserService;
     private final UserLoginMapper userLoginMapper;
+    private final PasswordEncoder passwordEncoder;
+    @Value("${spring.sigIntegral}")
+    private String sigIntegral;
 
     @Override
     public Object queryAll(UserQueryCriteria criteria, Pageable pageable) {
@@ -90,9 +99,12 @@ public class UserServiceImpl implements UserService {
         if (userRepository.findByEmail(resources.getEmail()) != null) {
             throw new EntityExistException(User.class, "email", resources.getEmail());
         }
-        if (userRepository.findByPhone(resources.getPhone()) != null) {
-            throw new EntityExistException(User.class, "phone", resources.getPhone());
-        }
+//        if (userRepository.findByPhone(resources.getPhone()) != null) {
+//            throw new EntityExistException(User.class, "phone", resources.getPhone());
+//        }
+        resources.setSigState("N");
+        resources.setWallet(0);
+        resources.setVipTime(DateUtil.date());
         userRepository.save(resources);
     }
 
@@ -136,6 +148,11 @@ public class UserServiceImpl implements UserService {
         user.setPhone(resources.getPhone());
         user.setNickName(resources.getNickName());
         user.setGender(resources.getGender());
+        user.setVipTime(resources.getVipTime());
+        user.setWallet(resources.getWallet());
+        if (StrUtil.isNotEmpty(resources.getPassword())) {
+            user.setPassword(passwordEncoder.encode(resources.getPassword()));
+        }
         userRepository.save(user);
         // 清除缓存
         delCaches(user.getId(), user.getUsername());
@@ -155,6 +172,89 @@ public class UserServiceImpl implements UserService {
         userRepository.save(user);
         // 清理缓存
         delCaches(user.getId(), user.getUsername());
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void updateSigSate() {
+        userRepository.updateSigSate();
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Result<Object> sig() {
+        try {
+            UserDto byId = findById(SecurityUtils.getCurrentUserId());
+            if ("Y".equals(byId.getSigState())) {
+                return Result.error("请勿重复签到！");
+            }
+            Integer sig = userRepository.sig(SecurityUtils.getCurrentUserId(),sigIntegral);
+            if (sig>0){
+                return Result.of("签到成功！");
+            }
+            return Result.error("签到失败！");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Result.error("内部错误请联系管理员！");
+        }
+    }
+
+    @Override
+    public Result<Object> isVip() {
+        UserDto byId = findById(SecurityUtils.getCurrentUserId());
+        if (DateUtil.compare(byId.getVipTime(),DateUtil.date())>0) {
+            return Result.error("非会员");
+        }
+        return Result.of("会员");
+    }
+
+    @Override
+    public Result<Object> registerUser(User user) {
+        try {
+            if (userRepository.findByUsername(user.getUsername()) != null) {
+                throw new EntityExistException(User.class, "username", user.getUsername());
+            }
+            if (userRepository.findByEmail(user.getEmail()) != null) {
+                throw new EntityExistException(User.class, "email", user.getEmail());
+            }
+            user.setVipTime(DateUtil.date());
+            user.setWallet(0);
+            user.setSigState("N");
+            userRepository.save(user);
+            return Result.of("注册成功！");
+        } catch (EntityExistException e) {
+            e.printStackTrace();
+            return Result.error("注册失败！");
+        }
+    }
+
+    @Override
+    public Result<Object> setWallet(Integer number) {
+        try {
+            User byId = userRepository.getById(SecurityUtils.getCurrentUserId());
+            if (byId.getWallet()-number<0) {
+                return Result.error("余额不足！");
+            }
+            byId.setWallet(byId.getWallet()-number);
+            update(CopyUtil.copy(byId,User.class));
+            return Result.of("修改成功！");
+        } catch (Exception e) {
+            return Result.error("异常！");
+        }
+    }
+
+    @Override
+    public Result<Object> myCenter(User resources) {
+        try {
+            User byId = userRepository.getById(SecurityUtils.getCurrentUserId());
+            if (StrUtil.isNotEmpty(resources.getNickName())) {
+                byId.setNickName(resources.getNickName());
+            }
+            userRepository.save(byId);
+            return Result.of("修改成功！");
+        } catch (Exception e) {
+            return Result.error("异常！");
+        }
     }
 
     @Override

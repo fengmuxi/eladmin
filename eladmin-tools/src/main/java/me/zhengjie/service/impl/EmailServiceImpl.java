@@ -84,6 +84,14 @@ public class EmailServiceImpl implements EmailService {
         account.setFrom(emailConfig.getUser()+"<"+emailConfig.getFromUser()+">");
         // ssl方式发送
         account.setSslEnable(true);
+        //指定实现javax.net.SocketFactory接口的类的名称,这个类将被用于创建SMTP的套接字
+        account.setSocketFactoryClass("javax.net.ssl.SSLSocketFactory");
+        //如果设置为true,未能创建一个套接字使用指定的套接字工厂类将导致使用java.net.Socket创建的套接字类, 默认值为true
+        account.setSocketFactoryFallback(true);
+        // 指定的端口连接到在使用指定的套接字工厂。如果没有设置,将使用默认端口456
+        account.setSocketFactoryPort(465);
+        // 解决(Could not connect to SMTP host:smtp.exmail.qq.com,port:465)
+        account.setSslProtocols("TLSv1.2");
         // 使用STARTTLS安全连接
         account.setStarttlsEnable(true);
         String content = emailVo.getContent();

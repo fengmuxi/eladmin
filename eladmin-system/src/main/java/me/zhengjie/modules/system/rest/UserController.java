@@ -16,10 +16,12 @@
 package me.zhengjie.modules.system.rest;
 
 import cn.hutool.core.collection.CollectionUtil;
+import cn.hutool.core.util.StrUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import me.zhengjie.annotation.Log;
+import me.zhengjie.annotation.rest.AnonymousPostMapping;
 import me.zhengjie.config.RsaProperties;
 import me.zhengjie.modules.system.domain.Dept;
 import me.zhengjie.modules.system.service.DataService;
@@ -102,16 +104,57 @@ public class UserController {
         return new ResponseEntity<>(PageUtil.toPage(null,0),HttpStatus.OK);
     }
 
+    @Log("签到")
+    @ApiOperation("签到")
+    @GetMapping("/sig")
+    public Result<Object> sig(){
+        return userService.sig();
+    }
+
+    @Log("是否会员")
+    @ApiOperation("是否会员")
+    @GetMapping("/isVip")
+    public Result<Object> isVip(){
+        return userService.isVip();
+    }
+
+    @Log("积分接口")
+    @ApiOperation("积分接口")
+    @GetMapping("/setWallet")
+    public Result<Object> setWallet(Integer number){
+        return userService.setWallet(number);
+    }
+
+    @Log("查询个人信息")
+    @ApiOperation("查询个人信息")
+    @GetMapping("/getInfo")
+    public Result<Object> getInfo(){
+        UserDto byName = userService.findByName(SecurityUtils.getCurrentUsername());
+        byName.setPassword("");
+        return Result.of(byName);
+    }
+
     @Log("新增用户")
     @ApiOperation("新增用户")
     @PostMapping
     @PreAuthorize("@el.check('user:add')")
     public ResponseEntity<Object> createUser(@Validated @RequestBody User resources){
         checkLevel(resources);
-        // 默认密码 123456
-        resources.setPassword(passwordEncoder.encode("123456"));
+        if (StrUtil.isEmpty(resources.getPassword())) {
+            // 默认密码 123456
+            resources.setPassword(passwordEncoder.encode("123456"));
+        }
         userService.create(resources);
         return new ResponseEntity<>(HttpStatus.CREATED);
+    }
+
+    @Log("注册用户")
+    @ApiOperation("注册用户")
+    @AnonymousPostMapping("/registerUser/{code}")
+    public Result<Object> registerUser(@RequestBody User user,@PathVariable String code){
+        verificationCodeService.validated(CodeEnum.EMAIL_REGISTER_EMAIL_CODE.getKey() + user.getEmail(), code);
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        return userService.registerUser(user);
     }
 
     @Log("修改用户")
@@ -122,6 +165,13 @@ public class UserController {
         checkLevel(resources);
         userService.update(resources);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    @Log("修改用户：个人中心")
+    @ApiOperation("修改用户：个人中心")
+    @PutMapping(value = "myCenter")
+    public Result<Object> myCenter(@Validated(User.Update.class) @RequestBody User resources){
+        return userService.myCenter(resources);
     }
 
     @Log("修改用户：个人中心")

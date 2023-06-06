@@ -45,7 +45,7 @@ public class VerifyServiceImpl implements VerifyService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public EmailVo sendEmail(String email, String key) {
+    public EmailVo sendEmail(String email, String key, String description) {
         EmailVo emailVo;
         String content;
         String redisKey = key + email;
@@ -59,12 +59,12 @@ public class VerifyServiceImpl implements VerifyService {
             if(!redisUtils.set(redisKey, code, expiration)){
                 throw new BadRequestException("服务异常，请联系网站负责人");
             }
-            content = template.render(Dict.create().set("code",code));
-            emailVo = new EmailVo(Collections.singletonList(email),"ELADMIN后台管理系统",content);
+            content = template.render(Dict.create().set("code",code).set("title",description));
+            emailVo = new EmailVo(Collections.singletonList(email),"ChatGpt-Web",content);
         // 存在就再次发送原来的验证码
         } else {
-            content = template.render(Dict.create().set("code",oldCode));
-            emailVo = new EmailVo(Collections.singletonList(email),"ELADMIN后台管理系统",content);
+            content = template.render(Dict.create().set("code",oldCode).set("title",description));
+            emailVo = new EmailVo(Collections.singletonList(email),"ChatGpt-Web",content);
         }
         return emailVo;
     }

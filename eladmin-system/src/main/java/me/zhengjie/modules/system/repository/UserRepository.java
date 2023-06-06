@@ -127,4 +127,20 @@ public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificat
     @Query(value = "SELECT count(1) FROM sys_user u, sys_users_roles r WHERE " +
             "u.user_id = r.user_id AND r.role_id in ?1", nativeQuery = true)
     int countByRoles(Set<Long> ids);
+
+    /**
+     * 重置签到
+     * @return /
+     */
+    @Modifying
+    @Query(value = "update sys_user set sig_state='N' where sig_state='Y'", nativeQuery = true)
+    void updateSigSate();
+
+    /**
+     * 签到
+     * @return /
+     */
+    @Modifying
+    @Query(value = "update sys_user set sig_state='Y',wallet=wallet+?2 where sig_state='N' and user_id=?1", nativeQuery = true)
+    Integer sig(Long currentUserId, String sigIntegral);
 }

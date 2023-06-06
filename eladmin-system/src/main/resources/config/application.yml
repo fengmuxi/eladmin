@@ -22,16 +22,23 @@ spring:
     open-in-view: true
     properties:
       hibernate:
+#        show_sql: true
         dialect: org.hibernate.dialect.MySQL5InnoDBDialect
 
   redis:
     #数据库索引
     database: ${REDIS_DB:0}
-    host: ${REDIS_HOST:127.0.0.1}
+    host: ${REDIS_HOST:47.94.237.159}
     port: ${REDIS_PORT:6379}
-    password: ${REDIS_PWD:}
+    password: ${REDIS_PWD:123456}
     #连接超时时间
     timeout: 5000
+
+  #卡密加密密码
+  kaMiPassword: dak3le2
+
+  #签到赠送积分数
+  sigIntegral: 5
 
 task:
   pool:
@@ -55,4 +62,4 @@ code:
 
 #密码加密传输，前端公钥加密，后端私钥解密
 rsa:
-  private_key: MIIBUwIBADANBgkqhkiG9w0BAQEFAASCAT0wggE5AgEAAkEA0vfvyTdGJkdbHkB8mp0f3FE0GYP3AYPaJF7jUd1M0XxFSE2ceK3k2kw20YvQ09NJKk+OMjWQl9WitG9pB6tSCQIDAQABAkA2SimBrWC2/wvauBuYqjCFwLvYiRYqZKThUS3MZlebXJiLB+Ue/gUifAAKIg1avttUZsHBHrop4qfJCwAI0+YRAiEA+W3NK/RaXtnRqmoUUkb59zsZUBLpvZgQPfj1MhyHDz0CIQDYhsAhPJ3mgS64NbUZmGWuuNKp5coY2GIj/zYDMJp6vQIgUueLFXv/eZ1ekgz2Oi67MNCk5jeTF2BurZqNLR3MSmUCIFT3Q6uHMtsB9Eha4u7hS31tj1UWE+D+ADzp59MGnoftAiBeHT7gDMuqeJHPL4b+kC+gzV4FGTfhR9q3tTbklZkD2A==
+  private_key: MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDRppG9trRySmRRLYl+cVYG4uclWVP76dYL5Bl7KD0lJPmwd7eLyx0r40rAd4gQhPvdz8v5Q5XWzEM9tYaVZqrlIwAUg05CiZSN2QYUGIGYFL0jrM7Li/tTcGM/dgVY+KhlX2hMO3/Nipad0iEkFG+Njv3Pkpq+CYvzq5vC9ru23fwxAVXVV22GikcZY7A+UdEDJvbP7nag/YThcdyp1dkbO9eBW8BY4VHWX9msicM1QifxfiIEoSXgPPINNH8SI79T3E0vKExvsv/lZSvVR1KlDDxHiadb0UjgPKsbsTvED/Ti3q+EMU07TQMfJwWo6AY3P0dG/T0USsZ8qzvh1BSvAgMBAAECggEAFQLEiGbPHsUl2JzfsrRZEseasruJFy4QLZDmnNkjh511CKJ22qO4gLV+wFs6X610MH6qyohjc+t0sbKHkmF/rwca8vNV3IU9RhoB6fGqyzsI2ZJwByY4Qdx5ldqWHpyNA9vT8A/mdwr0nUx51cvWgjFabnsa1wDN7dW8/oULuv/F3siC0CjFFLnOXmx8Btmgt1wqiZ6cqdsmMpQkmTcvUCmU012c+eZj3O3AM8oyk4NELY+d+ibN9+JGZDXWfD0tUDCeMWh+YZBb4rSBlleYMwFaHnACCtv5ODRUwu7fTsXGdahnzLCf8b1yBpuI22o075U2PeCce5prebJPktekwQKBgQDpDJylyET+Ku//LigE+oIg95+rjFynN2zzFbBsigUWddr9f4YRwKRUQruthagTT+34cpv9qj88i+So3l5INeDYNvGoBZ4urfyWRz/CfeN4x7g8henx2Q9gYBuwnnEqBFrjfijySzr76pT1cW3NrFjB8F3I+ATBMBAd6PU3whD17QKBgQDmTA6QiBlnCVOwrgGTb95cINp5f7R9EzMF4S37S/Iamm4QsZpsgket70CA580rxosTtj0N1Vzq8I38OUYM/wq3MjNcbjCiMqN9xCwapysoVy/wzCSGAM7Yb2LjwWVmV6zBvy4y49H3a6MD2rhN2sOjT4cm4UGrH4RIYKje0TchiwKBgBUWSQ5PIr8Ez5Z9bK2WpTOqdE4nczLGNxt/uOj5TCCOJXSOl2j/z164cxbuYxjsQJIcfLTlNLebyOLmzA0oouGthww3BesfXx2R8Nj+XxjMqYUAcPyrMVL9H0RJ8d9laXvwLHBQElQ9E6Fp1A+qKpXR1AqdNoDsgmjSbW3QJ4y5AoGAdpneulJM+sJT5l6Gkz5+fmWw/fdlpTA5C6MfAhbnlQnI+zHr/EvPzGS1jG1UPWIfh8RHhxNFqfy+spFwYQsLorLovoZE55M6nW9k40kKMdlM6C7J9HUAEXizreWQafdnEdR6X1zyagB10GtYlUe/jyBK0xwYrJ8rifa1oSKPyOcCgYEAiRUG2dBLY7CjjDqHSQweV9tM/IuEZ49z2jWszdE0nZzrjM59Rbk5z3/Fqh+nretFxkqwPgZUhbjstR9R/r7Bo8wzSX2/tF+MpBNbWAVj5i+n93Y0L84SzSpJnkGu3TxShFw7bghePcWcdqQ3ayXPCyWmt9rXd5pUCA8eHB5ex28=

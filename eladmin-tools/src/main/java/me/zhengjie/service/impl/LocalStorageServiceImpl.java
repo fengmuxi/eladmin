@@ -15,6 +15,7 @@
  */
 package me.zhengjie.service.impl;
 
+import cn.hutool.core.lang.UUID;
 import cn.hutool.core.util.ObjectUtil;
 import lombok.RequiredArgsConstructor;
 import me.zhengjie.config.FileProperties;
@@ -75,7 +76,7 @@ public class LocalStorageServiceImpl implements LocalStorageService {
         FileUtil.checkSize(properties.getMaxSize(), multipartFile.getSize());
         String suffix = FileUtil.getExtensionName(multipartFile.getOriginalFilename());
         String type = FileUtil.getFileType(suffix);
-        File file = FileUtil.upload(multipartFile, properties.getPath().getPath() + type +  File.separator);
+        File file = FileUtil.upload(multipartFile, properties.getPath().getPath() + type + UUID.randomUUID());
         if(ObjectUtil.isNull(file)){
             throw new BadRequestException("上传失败");
         }

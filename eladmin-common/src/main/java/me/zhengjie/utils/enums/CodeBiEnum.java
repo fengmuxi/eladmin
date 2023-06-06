@@ -33,7 +33,10 @@ public enum CodeBiEnum {
     ONE(1, "旧邮箱修改邮箱"),
 
     /* 通过邮箱修改密码 */
-    TWO(2, "通过邮箱修改密码");
+    TWO(2, "通过邮箱修改密码"),
+
+    /* 注册邮箱验证码 */
+    THREE(3, "注册邮箱验证码");
 
     private final Integer code;
     private final String description;

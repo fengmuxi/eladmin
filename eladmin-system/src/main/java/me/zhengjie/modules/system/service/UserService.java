@@ -19,7 +19,9 @@ import me.zhengjie.modules.system.domain.User;
 import me.zhengjie.modules.system.service.dto.UserDto;
 import me.zhengjie.modules.system.service.dto.UserLoginDto;
 import me.zhengjie.modules.system.service.dto.UserQueryCriteria;
+import me.zhengjie.utils.Result;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -122,4 +124,36 @@ public interface UserService {
      * @param resources /
      */
     void updateCenter(User resources);
+
+    /**
+     * 重置用户签到
+     *
+     */
+    void updateSigSate();
+
+    /**
+     * 用户签到
+     *
+     */
+    Result<Object> sig();
+
+    /**
+     * 用户是否会员
+     *
+     */
+    Result<Object> isVip();
+
+    /**
+     * 注册用户
+     *
+     * @author: xdf
+     * @date: 2023/6/1 19:11
+     * @Param user
+     * @return me.zhengjie.utils.Result<java.lang.Object>
+     **/
+    Result<Object> registerUser(User user);
+
+    Result<Object> setWallet(Integer number);
+
+    Result<Object> myCenter(User resources);
 }

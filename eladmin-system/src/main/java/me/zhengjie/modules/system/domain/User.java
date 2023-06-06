@@ -78,7 +78,6 @@ public class User extends BaseEntity implements Serializable {
     @ApiModelProperty(value = "邮箱")
     private String email;
 
-    @NotBlank
     @ApiModelProperty(value = "电话号码")
     private String phone;
 
@@ -104,6 +103,15 @@ public class User extends BaseEntity implements Serializable {
     @Column(name = "pwd_reset_time")
     @ApiModelProperty(value = "最后修改密码的时间", hidden = true)
     private Date pwdResetTime;
+
+    @ApiModelProperty(value = "vip时间")
+    private Date vipTime;
+
+    @ApiModelProperty(value = "积分")
+    private Integer wallet;
+
+    @ApiModelProperty(value = "签到状态")
+    private String sigState;
 
     @Override
     public boolean equals(Object o) {
