@@ -38,7 +38,7 @@ spring:
   kaMiPassword: dak3le2
 
   #签到赠送积分数
-  sigIntegral: 5
+  sigIntegral: 3
 
 task:
   pool:

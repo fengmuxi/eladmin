@@ -45,7 +45,7 @@ public class VerifyServiceImpl implements VerifyService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public EmailVo sendEmail(String email, String key, String description) {
+    public EmailVo sendEmail(String email, String key, String description,String code) {
         EmailVo emailVo;
         String content;
         String redisKey = key + email;
@@ -54,7 +54,6 @@ public class VerifyServiceImpl implements VerifyService {
         Template template = engine.getTemplate("email/email.ftl");
         Object oldCode =  redisUtils.get(redisKey);
         if(oldCode == null){
-            String code = RandomUtil.randomNumbers (6);
             // 存入缓存
             if(!redisUtils.set(redisKey, code, expiration)){
                 throw new BadRequestException("服务异常，请联系网站负责人");

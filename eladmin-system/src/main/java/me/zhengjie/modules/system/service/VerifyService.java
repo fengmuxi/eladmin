@@ -30,7 +30,7 @@ public interface VerifyService {
      * @param description
      * @return /
      */
-    EmailVo sendEmail(String email, String key, String description);
+    EmailVo sendEmail(String email, String key, String description,String code);
 
 
     /**

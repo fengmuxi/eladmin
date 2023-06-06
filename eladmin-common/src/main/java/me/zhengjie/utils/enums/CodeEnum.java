@@ -42,7 +42,10 @@ public enum CodeEnum {
     PHONE_RESET_PWD_CODE("phone_reset_pwd_code_", "您正在通过手机号码重置密码，您的验证码为："),
 
     /* 通过邮箱重置密码 */
-    EMAIL_RESET_PWD_CODE("email_reset_pwd_code_", "您正在通过邮箱重置密码，您的验证码为：");
+    EMAIL_RESET_PWD_CODE("email_reset_pwd_code_", "您正在通过邮箱重置密码，您的验证码为："),
+
+    /* 通过邮箱重置密码发送新密码 */
+    EMAIL_RESET_PWD("email_reset_pwd_", "您正在通过邮箱重置密码，您的新密码为：");
 
     private final String key;
     private final String description;

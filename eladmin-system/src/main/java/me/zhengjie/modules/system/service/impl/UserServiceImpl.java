@@ -16,9 +16,12 @@
 package me.zhengjie.modules.system.service.impl;
 
 import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
 import lombok.RequiredArgsConstructor;
 import me.zhengjie.config.FileProperties;
+import me.zhengjie.domain.vo.EmailVo;
 import me.zhengjie.exception.BadRequestException;
 import me.zhengjie.modules.security.service.OnlineUserService;
 import me.zhengjie.modules.security.service.UserCacheManager;
@@ -27,17 +30,18 @@ import me.zhengjie.exception.EntityExistException;
 import me.zhengjie.exception.EntityNotFoundException;
 import me.zhengjie.modules.system.repository.UserRepository;
 import me.zhengjie.modules.system.service.UserService;
+import me.zhengjie.modules.system.service.VerifyService;
 import me.zhengjie.modules.system.service.dto.*;
 import me.zhengjie.modules.system.service.mapstruct.UserLoginMapper;
 import me.zhengjie.modules.system.service.mapstruct.UserMapper;
+import me.zhengjie.service.EmailService;
 import me.zhengjie.utils.*;
+import me.zhengjie.utils.enums.CodeEnum;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -66,6 +70,8 @@ public class UserServiceImpl implements UserService {
     private final OnlineUserService onlineUserService;
     private final UserLoginMapper userLoginMapper;
     private final PasswordEncoder passwordEncoder;
+    private final VerifyService verificationCodeService;
+    private final EmailService emailService;
     @Value("${spring.sigIntegral}")
     private String sigIntegral;
 
@@ -103,7 +109,9 @@ public class UserServiceImpl implements UserService {
 //            throw new EntityExistException(User.class, "phone", resources.getPhone());
 //        }
         resources.setSigState("N");
-        resources.setWallet(0);
+        if (ObjectUtil.isEmpty(resources.getWallet())) {
+            resources.setWallet(5);
+        }
         resources.setVipTime(DateUtil.date());
         userRepository.save(resources);
     }
@@ -115,16 +123,16 @@ public class UserServiceImpl implements UserService {
         ValidationUtil.isNull(user.getId(), "User", "id", resources.getId());
         User user1 = userRepository.findByUsername(resources.getUsername());
         User user2 = userRepository.findByEmail(resources.getEmail());
-        User user3 = userRepository.findByPhone(resources.getPhone());
+//        User user3 = userRepository.findByPhone(resources.getPhone());
         if (user1 != null && !user.getId().equals(user1.getId())) {
             throw new EntityExistException(User.class, "username", resources.getUsername());
         }
         if (user2 != null && !user.getId().equals(user2.getId())) {
             throw new EntityExistException(User.class, "email", resources.getEmail());
         }
-        if (user3 != null && !user.getId().equals(user3.getId())) {
-            throw new EntityExistException(User.class, "phone", resources.getPhone());
-        }
+//        if (user3 != null && !user.getId().equals(user3.getId())) {
+//            throw new EntityExistException(User.class, "phone", resources.getPhone());
+//        }
         // 如果用户的角色改变
         if (!resources.getRoles().equals(user.getRoles())) {
             redisUtils.del(CacheKey.DATA_USER + resources.getId());
@@ -254,6 +262,25 @@ public class UserServiceImpl implements UserService {
             return Result.of("修改成功！");
         } catch (Exception e) {
             return Result.error("异常！");
+        }
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Result<Object> restPwd(String mail, String code) {
+        try {
+            User user = userRepository.findByEmail(mail);
+            verificationCodeService.validated(CodeEnum.EMAIL_RESET_PWD_CODE.getKey() + user.getEmail(), code);
+            String pwd = RandomUtil.randomString(6);
+            EmailVo emailVo = verificationCodeService.sendEmail(user.getEmail(), CodeEnum.EMAIL_RESET_PWD.getKey(), CodeEnum.EMAIL_RESET_PWD.getDescription(),pwd);
+            emailService.send(emailVo,emailService.find());
+            user.setPassword(passwordEncoder.encode(pwd));
+            update(user);
+            redisUtils.del(CodeEnum.EMAIL_RESET_PWD_CODE.getKey() + user.getEmail());
+            return Result.of("重置成功！新密码已发送至您的邮箱!");
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new BadRequestException("重置失败！");
         }
     }
 

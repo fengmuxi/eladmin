@@ -143,6 +143,8 @@ public class UserController {
         if (StrUtil.isEmpty(resources.getPassword())) {
             // 默认密码 123456
             resources.setPassword(passwordEncoder.encode("123456"));
+        }else {
+            resources.setPassword(passwordEncoder.encode(resources.getPassword()));
         }
         userService.create(resources);
         return new ResponseEntity<>(HttpStatus.CREATED);
@@ -235,6 +237,13 @@ public class UserController {
         verificationCodeService.validated(CodeEnum.EMAIL_RESET_EMAIL_CODE.getKey() + user.getEmail(), code);
         userService.updateEmail(userDto.getUsername(),user.getEmail());
         return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @Log("重置密码")
+    @ApiOperation("重置密码")
+    @AnonymousPostMapping("/restPwd")
+    public Result<Object> restPwd(String mail,String code){
+        return userService.restPwd(mail,code);
     }
 
     /**

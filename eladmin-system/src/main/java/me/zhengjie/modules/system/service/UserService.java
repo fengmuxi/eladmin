@@ -21,7 +21,6 @@ import me.zhengjie.modules.system.service.dto.UserLoginDto;
 import me.zhengjie.modules.system.service.dto.UserQueryCriteria;
 import me.zhengjie.utils.Result;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -156,4 +155,6 @@ public interface UserService {
     Result<Object> setWallet(Integer number);
 
     Result<Object> myCenter(User resources);
+
+    Result<Object> restPwd(String mail, String code);
 }
