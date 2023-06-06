@@ -211,9 +211,9 @@ public class UserServiceImpl implements UserService {
     public Result<Object> isVip() {
         UserDto byId = findById(SecurityUtils.getCurrentUserId());
         if (DateUtil.compare(byId.getVipTime(),DateUtil.date())>0) {
-            return Result.error("非会员");
+            return Result.of("会员");
         }
-        return Result.of("会员");
+        return Result.error("非会员");
     }
 
     @Override
