@@ -28,6 +28,8 @@ public class QiNiuUtil {
 
     private static final String HUAD = "华东";
 
+    private static final String HUAD_ZHEJIANG = "华东2";
+
     private static final String HUAB = "华北";
 
     private static final String HUAN = "华南";
@@ -47,6 +49,8 @@ public class QiNiuUtil {
             return Region.huabei();
         } else if(HUAN.equals(zone)){
             return Region.huanan();
+        } else if(HUAD_ZHEJIANG.equals(zone)){
+            return Region.huadongZheJiang2();
         } else if (BEIM.equals(zone)){
             return Region.beimei();
             // 否则就是东南亚

@@ -20,6 +20,7 @@ public enum ErrorEnum {
 
     //500系列
     INTERNAL_SERVER_ERROR("500", "服务器内部错误，请联系管理员！"),
+    SYSTEM_RUNTIME_ERROR("502", "服务器异常！"),
     SERVICE_UNAVAILABLE("503","服务器正忙，请稍后再试!");
 
 

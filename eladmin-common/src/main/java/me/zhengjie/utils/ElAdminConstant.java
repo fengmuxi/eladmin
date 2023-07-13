@@ -42,6 +42,7 @@ public class ElAdminConstant {
      */
     public static class Url {
         // IP归属地查询
-        public static final String IP_URL = "http://whois.pconline.com.cn/ipJson.jsp?ip=%s&json=true";
+//        public static final String IP_URL = "http://whois.pconline.com.cn/ipJson.jsp?ip=%s&json=true";
+        public static final String IP_URL = "https://qifu-api.baidubce.com/ip/geo/v1/district?ip=%s";
     }
 }

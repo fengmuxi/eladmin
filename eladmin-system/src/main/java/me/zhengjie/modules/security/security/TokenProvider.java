@@ -109,7 +109,7 @@ public class TokenProvider implements InitializingBean {
         // 如果在续期检查的范围内，则续期
         if (differ <= properties.getDetect()) {
             long renew = time + properties.getRenew();
-            redisUtils.expire(properties.getOnlineKey() + token, renew, TimeUnit.MILLISECONDS);
+            redisUtils.expire(properties.getOnlineKey() + token, renew, TimeUnit.DAYS);
         }
     }
 

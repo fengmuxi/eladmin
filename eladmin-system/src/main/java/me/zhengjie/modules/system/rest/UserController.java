@@ -23,6 +23,7 @@ import lombok.RequiredArgsConstructor;
 import me.zhengjie.annotation.Log;
 import me.zhengjie.annotation.rest.AnonymousPostMapping;
 import me.zhengjie.config.RsaProperties;
+import me.zhengjie.domain.vo.EmailVo;
 import me.zhengjie.modules.system.domain.Dept;
 import me.zhengjie.modules.system.service.DataService;
 import me.zhengjie.modules.system.domain.User;
@@ -244,6 +245,15 @@ public class UserController {
     @AnonymousPostMapping("/restPwd")
     public Result<Object> restPwd(String mail,String code){
         return userService.restPwd(mail,code);
+    }
+
+
+    @Log("发送通知")
+    @PostMapping("/title")
+    @ApiOperation("发送通知")
+    public ResponseEntity<Object> sendEmailTitle(@Validated @RequestBody EmailVo emailVo){
+        userService.sendEmailTitle(emailVo);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     /**

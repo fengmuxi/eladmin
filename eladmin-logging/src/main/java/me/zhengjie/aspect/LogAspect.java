@@ -69,7 +69,7 @@ public class LogAspect {
         Log log = new Log("INFO",System.currentTimeMillis() - currentTime.get());
         currentTime.remove();
         HttpServletRequest request = RequestHolder.getHttpServletRequest();
-        logService.save(getUsername(), StringUtils.getBrowser(request), StringUtils.getIp(request),joinPoint, log);
+        logService.save(getUsername(), StringUtils.getBrowser(request), StringUtils.getClientIpAddr(request),joinPoint, log);
         return result;
     }
 
@@ -85,7 +85,7 @@ public class LogAspect {
         currentTime.remove();
         log.setExceptionDetail(ThrowableUtil.getStackTrace(e).getBytes());
         HttpServletRequest request = RequestHolder.getHttpServletRequest();
-        logService.save(getUsername(), StringUtils.getBrowser(request), StringUtils.getIp(request), (ProceedingJoinPoint)joinPoint, log);
+        logService.save(getUsername(), StringUtils.getBrowser(request), StringUtils.getClientIpAddr(request), (ProceedingJoinPoint)joinPoint, log);
     }
 
     public String getUsername() {

@@ -17,26 +17,40 @@ package me.zhengjie.modules.system.service.dto;
 
 import lombok.Data;
 import java.sql.Timestamp;
-import java.util.List;
-import me.zhengjie.annotation.Query;
+import java.io.Serializable;
+import com.alibaba.fastjson.annotation.JSONField;
+import com.alibaba.fastjson.serializer.ToStringSerializer;
 
 /**
 * @website https://eladmin.vip
+* @description /
 * @author xdf
-* @date 2023-05-31
+* @date 2023-06-15
 **/
 @Data
-public class UserKamiQueryCriteria{
+public class ChatMessageDto implements Serializable {
 
-    /** BETWEEN */
-    @Query(type = Query.Type.BETWEEN)
-    private List<Timestamp> expirationTime;
+    /** 消息主键 */
+    /** 防止精度丢失 */
+    @JSONField(serializeUsing = ToStringSerializer.class)
+    private Long messageId;
 
-    /** 精确 */
-    @Query
-    private String status;
+    /** 消息类型 */
+    private String messageType;
 
-    /** 精确 */
-    @Query
-    private String type;
+    /** 消息内容 */
+    private String messageText;
+
+    /** ip */
+    private String requestIp;
+
+    /** ip地址 */
+    private String ipAddress;
+
+    /** 用户名 */
+    private String username;
+    /** 消息来源 */
+    private String messageSource;
+
+    private Timestamp createTime;
 }

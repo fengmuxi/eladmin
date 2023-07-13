@@ -113,6 +113,9 @@ public class User extends BaseEntity implements Serializable {
     @ApiModelProperty(value = "签到状态")
     private String sigState;
 
+    @ApiModelProperty(value = "签到状态")
+    private Date loginTime;
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {

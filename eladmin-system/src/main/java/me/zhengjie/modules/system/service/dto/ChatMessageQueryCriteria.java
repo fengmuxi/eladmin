@@ -23,20 +23,34 @@ import me.zhengjie.annotation.Query;
 /**
 * @website https://eladmin.vip
 * @author xdf
-* @date 2023-05-31
+* @date 2023-06-15
 **/
 @Data
-public class UserKamiQueryCriteria{
+public class ChatMessageQueryCriteria{
 
+    /** 精确 */
+    @Query
+    private String messageType;
+
+    /** 精确 */
+    @Query
+    private String messageSource;
+
+    /** 模糊 */
+    @Query(type = Query.Type.INNER_LIKE)
+    private String messageText;
+
+    /** 精确 */
+    @Query
+    private String requestIp;
+
+    /** 模糊 */
+    @Query(type = Query.Type.INNER_LIKE)
+    private String ipAddress;
+
+    /** 精准 */
+    private String username;
     /** BETWEEN */
     @Query(type = Query.Type.BETWEEN)
-    private List<Timestamp> expirationTime;
-
-    /** 精确 */
-    @Query
-    private String status;
-
-    /** 精确 */
-    @Query
-    private String type;
+    private List<Timestamp> createTime;
 }

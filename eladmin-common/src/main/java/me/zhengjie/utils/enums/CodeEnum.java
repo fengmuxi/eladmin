@@ -18,6 +18,8 @@ package me.zhengjie.utils.enums;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
+import javax.smartcardio.Card;
+
 /**
  * <p>
  * 验证码业务场景对应的 Redis 中的 key
@@ -45,7 +47,13 @@ public enum CodeEnum {
     EMAIL_RESET_PWD_CODE("email_reset_pwd_code_", "您正在通过邮箱重置密码，您的验证码为："),
 
     /* 通过邮箱重置密码发送新密码 */
-    EMAIL_RESET_PWD("email_reset_pwd_", "您正在通过邮箱重置密码，您的新密码为：");
+    EMAIL_RESET_PWD("email_reset_pwd_", "您正在通过邮箱重置密码，您的新密码为："),
+
+    /* 兑换会员卡密 */
+    REDEEM_MEMBER_CARD_SECRET("redeem_member_card_secret_", "您正在兑换会员卡密："),
+
+    /* 兑换积分卡密 */
+    REDEMPTION_POINTS_CARD_SECRET("redemption_points_card_secret_", "您正在兑换积分卡密：");
 
     private final String key;
     private final String description;

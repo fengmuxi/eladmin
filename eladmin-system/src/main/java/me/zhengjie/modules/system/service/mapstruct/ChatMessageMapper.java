@@ -13,30 +13,20 @@
 *  See the License for the specific language governing permissions and
 *  limitations under the License.
 */
-package me.zhengjie.modules.system.service.dto;
+package me.zhengjie.modules.system.service.mapstruct;
 
-import lombok.Data;
-import java.sql.Timestamp;
-import java.util.List;
-import me.zhengjie.annotation.Query;
+import me.zhengjie.base.BaseMapper;
+import me.zhengjie.modules.system.domain.ChatMessage;
+import me.zhengjie.modules.system.service.dto.ChatMessageDto;
+import org.mapstruct.Mapper;
+import org.mapstruct.ReportingPolicy;
 
 /**
 * @website https://eladmin.vip
 * @author xdf
-* @date 2023-05-31
+* @date 2023-06-15
 **/
-@Data
-public class UserKamiQueryCriteria{
+@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
+public interface ChatMessageMapper extends BaseMapper<ChatMessageDto, ChatMessage> {
 
-    /** BETWEEN */
-    @Query(type = Query.Type.BETWEEN)
-    private List<Timestamp> expirationTime;
-
-    /** 精确 */
-    @Query
-    private String status;
-
-    /** 精确 */
-    @Query
-    private String type;
 }

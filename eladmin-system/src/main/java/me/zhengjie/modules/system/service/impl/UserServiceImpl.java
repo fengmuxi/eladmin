@@ -16,11 +16,16 @@
 package me.zhengjie.modules.system.service.impl;
 
 import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.lang.UUID;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.extra.mail.Mail;
+import cn.hutool.extra.mail.MailAccount;
 import lombok.RequiredArgsConstructor;
+import lombok.Synchronized;
 import me.zhengjie.config.FileProperties;
+import me.zhengjie.domain.EmailConfig;
 import me.zhengjie.domain.vo.EmailVo;
 import me.zhengjie.exception.BadRequestException;
 import me.zhengjie.modules.security.service.OnlineUserService;
@@ -51,6 +56,7 @@ import javax.validation.constraints.NotBlank;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -191,28 +197,50 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Result<Object> sig() {
+        String uuid = UUID.randomUUID().toString().replace("_", "");
         try {
-            UserDto byId = findById(SecurityUtils.getCurrentUserId());
-            if ("Y".equals(byId.getSigState())) {
-                return Result.error("请勿重复签到！");
+            boolean isLock = redisUtils.set("lock:sig:" + SecurityUtils.getCurrentUserId(), uuid, 30, TimeUnit.SECONDS);
+            if (isLock) {
+                User byId = userRepository.getById(SecurityUtils.getCurrentUserId());
+                if ("Y".equals(byId.getSigState())) {
+                    return Result.error("请勿重复签到！");
+                }
+                Integer sig = userRepository.sig(SecurityUtils.getCurrentUserId(),sigIntegral);
+                if (sig>0){
+                    // 清理缓存
+                    delCaches(SecurityUtils.getCurrentUserId(), SecurityUtils.getCurrentUsername());
+                    return Result.of("签到成功！");
+                }
+                return Result.error("签到失败！");
+            }else {
+                return Result.error("请勿点击过快！");
             }
-            Integer sig = userRepository.sig(SecurityUtils.getCurrentUserId(),sigIntegral);
-            if (sig>0){
-                return Result.of("签到成功！");
-            }
-            return Result.error("签到失败！");
         } catch (Exception e) {
             e.printStackTrace();
             return Result.error("内部错误请联系管理员！");
+        }finally {
+            String  lock= redisUtils.get("lock:sig:" + SecurityUtils.getCurrentUserId()).toString();
+            if (lock.equals(uuid)) {
+                redisUtils.del("lock:sig:" + SecurityUtils.getCurrentUserId());
+            }
         }
     }
 
     @Override
     public Result<Object> isVip() {
-        UserDto byId = findById(SecurityUtils.getCurrentUserId());
+        Boolean isVip = redisUtils.hasKey("vip:" + SecurityUtils.getCurrentUserId());
+        if (Boolean.TRUE.equals(isVip)) {
+            String vip = redisUtils.get("vip:" + SecurityUtils.getCurrentUserId()).toString();
+            return Result.of(vip);
+        }
+        User byId = userRepository.getById(SecurityUtils.getCurrentUserId());
         if (DateUtil.compare(byId.getVipTime(),DateUtil.date())>0) {
+            // 判断当前时间与过期时间的时间差
+            long differ = byId.getVipTime().getTime() - System.currentTimeMillis();
+            redisUtils.set("vip:" + SecurityUtils.getCurrentUserId(), "会员", differ, TimeUnit.MILLISECONDS);
             return Result.of("会员");
         }
+        redisUtils.set("vip:" + SecurityUtils.getCurrentUserId(), "非会员");
         return Result.error("非会员");
     }
 
@@ -226,7 +254,7 @@ public class UserServiceImpl implements UserService {
                 throw new EntityExistException(User.class, "email", user.getEmail());
             }
             user.setVipTime(DateUtil.date());
-            user.setWallet(0);
+            user.setWallet(5);
             user.setSigState("N");
             userRepository.save(user);
             return Result.of("注册成功！");
@@ -244,7 +272,7 @@ public class UserServiceImpl implements UserService {
                 return Result.error("余额不足！");
             }
             byId.setWallet(byId.getWallet()-number);
-            update(CopyUtil.copy(byId,User.class));
+            userRepository.save(CopyUtil.copy(byId,User.class));
             return Result.of("修改成功！");
         } catch (Exception e) {
             return Result.error("异常！");
@@ -272,7 +300,7 @@ public class UserServiceImpl implements UserService {
             User user = userRepository.findByEmail(mail);
             verificationCodeService.validated(CodeEnum.EMAIL_RESET_PWD_CODE.getKey() + user.getEmail(), code);
             String pwd = RandomUtil.randomString(6);
-            EmailVo emailVo = verificationCodeService.sendEmail(user.getEmail(), CodeEnum.EMAIL_RESET_PWD.getKey(), CodeEnum.EMAIL_RESET_PWD.getDescription(),pwd);
+            EmailVo emailVo = verificationCodeService.sendEmailCode(user.getEmail(), CodeEnum.EMAIL_RESET_PWD.getKey(), CodeEnum.EMAIL_RESET_PWD.getDescription(),pwd);
             emailService.send(emailVo,emailService.find());
             user.setPassword(passwordEncoder.encode(pwd));
             update(user);
@@ -281,6 +309,73 @@ public class UserServiceImpl implements UserService {
         } catch (Exception e) {
             e.printStackTrace();
             throw new BadRequestException("重置失败！");
+        }
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Result<Object> updateLoginTime(String username) {
+        Integer integer = userRepository.updateLoginTime(username, me.zhengjie.utils.DateUtil.getNowDate());
+        if (integer>0) {
+            return Result.of();
+        }
+        return Result.error();
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void sendEmailTitle(EmailVo emailVo) {
+        EmailConfig emailConfig=emailService.find();
+        if(emailConfig.getId() == null){
+            throw new BadRequestException("请先配置，再操作");
+        }
+        // 封装
+        MailAccount account = new MailAccount();
+        // 设置用户
+        String user = emailConfig.getFromUser().split("@")[0];
+        account.setUser(user);
+        account.setHost(emailConfig.getHost());
+        account.setPort(Integer.parseInt(emailConfig.getPort()));
+        account.setAuth(true);
+        try {
+            // 对称解密
+            account.setPass(EncryptUtils.desDecrypt(emailConfig.getPass()));
+        } catch (Exception e) {
+            throw new BadRequestException(e.getMessage());
+        }
+        account.setFrom(emailConfig.getUser()+"<"+emailConfig.getFromUser()+">");
+        // ssl方式发送
+        account.setSslEnable(true);
+        //指定实现javax.net.SocketFactory接口的类的名称,这个类将被用于创建SMTP的套接字
+        account.setSocketFactoryClass("javax.net.ssl.SSLSocketFactory");
+        //如果设置为true,未能创建一个套接字使用指定的套接字工厂类将导致使用java.net.Socket创建的套接字类, 默认值为true
+        account.setSocketFactoryFallback(true);
+        // 指定的端口连接到在使用指定的套接字工厂。如果没有设置,将使用默认端口456
+        account.setSocketFactoryPort(465);
+        // 解决(Could not connect to SMTP host:smtp.exmail.qq.com,port:465)
+        account.setSslProtocols("TLSv1.2");
+        // 使用STARTTLS安全连接
+        account.setStarttlsEnable(true);
+        String content = emailVo.getContent();
+        List<User> all = userRepository.findAll();
+        List<String> emails=new ArrayList();
+        for (int i = 0; i < all.size(); i++) {
+            emails.add(all.get(i).getEmail());
+        }
+        emailVo.setTos(emails);
+        // 发送
+        try {
+            int size = emailVo.getTos().size();
+            Mail.create(account)
+                    .setTos(emailVo.getTos().toArray(new String[size]))
+                    .setTitle(emailVo.getSubject())
+                    .setContent(content)
+                    .setHtml(true)
+                    //关闭session
+                    .setUseGlobalSession(false)
+                    .send();
+        }catch (Exception e){
+            throw new BadRequestException(e.getMessage());
         }
     }
 
@@ -296,6 +391,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Cacheable(key = "'userInfo:' + #p0")
     public UserDto findByName(String userName) {
         User user = userRepository.findByUsername(userName);
         if (user == null) {
@@ -383,6 +479,8 @@ public class UserServiceImpl implements UserService {
      */
     public void delCaches(Long id, String username) {
         redisUtils.del(CacheKey.USER_ID + id);
+        redisUtils.del("user::userInfo:" + username);
+        redisUtils.del("vip:" + id);
         flushCache(username);
     }
 

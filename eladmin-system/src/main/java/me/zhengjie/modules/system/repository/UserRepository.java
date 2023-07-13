@@ -143,4 +143,12 @@ public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificat
     @Modifying
     @Query(value = "update sys_user set sig_state='Y',wallet=wallet+?2 where sig_state='N' and user_id=?1", nativeQuery = true)
     Integer sig(Long currentUserId, String sigIntegral);
+
+    /**
+     * 更新登录时间
+     * @return /
+     */
+    @Modifying
+    @Query(value = "update sys_user set login_time=?2 where username=?1", nativeQuery = true)
+    Integer updateLoginTime(String username, Date nowDate);
 }

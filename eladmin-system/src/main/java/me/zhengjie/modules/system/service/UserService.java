@@ -15,6 +15,7 @@
  */
 package me.zhengjie.modules.system.service;
 
+import me.zhengjie.domain.vo.EmailVo;
 import me.zhengjie.modules.system.domain.User;
 import me.zhengjie.modules.system.service.dto.UserDto;
 import me.zhengjie.modules.system.service.dto.UserLoginDto;
@@ -157,4 +158,13 @@ public interface UserService {
     Result<Object> myCenter(User resources);
 
     Result<Object> restPwd(String mail, String code);
+
+    Result<Object> updateLoginTime(String username);
+
+    /**
+     * 发送通知
+     * @param emailVo 邮件发送的内容
+     * @throws Exception /
+     */
+    void sendEmailTitle(EmailVo emailVo);
 }

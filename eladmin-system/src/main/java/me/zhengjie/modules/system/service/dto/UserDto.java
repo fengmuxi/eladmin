@@ -70,4 +70,6 @@ public class UserDto extends BaseDTO implements Serializable {
     private Integer wallet;
 
     private String sigState;
+
+    private Date loginTime;
 }

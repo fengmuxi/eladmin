@@ -5,6 +5,8 @@ import me.zhengjie.utils.enums.ErrorEnum;
 
 import java.io.Serializable;
 
+import static me.zhengjie.utils.enums.ErrorEnum.SYSTEM_RUNTIME_ERROR;
+
 /**
  * 统一返回对象
  */
@@ -30,6 +32,9 @@ public class Result<T> implements Serializable {
     public static <T> Result<T> of(T data) {
         return new Result<>(data);
     }
+    public static <T> Result<T> of() {
+        return new Result<>("操作成功！");
+    }
 
     public static <T> Result<T> of(String msg) {
         return new Result<>(msg);
@@ -48,6 +53,10 @@ public class Result<T> implements Serializable {
 
     public static <T> Result<T> error(String msg) {
         return new Result("502",false,msg);
+    }
+
+    public static <T> Result<T> error() {
+        return new Result(SYSTEM_RUNTIME_ERROR,false,"操作失败！");
     }
 
     @Deprecated

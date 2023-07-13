@@ -31,57 +31,51 @@ import java.io.Serializable;
 * @website https://eladmin.vip
 * @description /
 * @author xdf
-* @date 2023-05-31
+* @date 2023-06-15
 **/
 @Entity
 @Data
-@Table(name="user_kami")
-public class UserKami implements Serializable {
+@Table(name="chat_message")
+public class ChatMessage implements Serializable {
 
     @Id
-    @Column(name = "`id`")
-    @ApiModelProperty(value = "主键id")
-    private String id;
+    @Column(name = "`message_id`")
+    @ApiModelProperty(value = "消息主键")
+    private Long messageId;
 
-    @Column(name = "`ka_mi`")
-    @ApiModelProperty(value = "卡密号")
-    private String kaMi;
+    @Column(name = "`message_type`",nullable = false)
+    @NotBlank
+    @ApiModelProperty(value = "消息类型")
+    private String messageType;
 
-    @Column(name = "`expiration_time`",nullable = false)
-    @NotNull
-    @ApiModelProperty(value = "过期时间")
-    private Timestamp expirationTime;
+    @Column(name = "`message_text`",nullable = false)
+    @NotBlank
+    @ApiModelProperty(value = "消息内容")
+    private String messageText;
+
+    @Column(name = "`request_ip`",nullable = false)
+    @ApiModelProperty(value = "ip")
+    private String requestIp;
+
+    @Column(name = "`ip_address`",nullable = false)
+    @ApiModelProperty(value = "ip地址")
+    private String ipAddress;
+
+    @Column(name = "`username`",nullable = false)
+    @ApiModelProperty(value = "用户名")
+    private String username;
 
     @Column(name = "`create_time`")
     @CreationTimestamp
-    @ApiModelProperty(value = "创建时间")
+    @ApiModelProperty(value = "createTime")
     private Timestamp createTime;
 
-    @Column(name = "`update_time`")
-    @UpdateTimestamp
-    @ApiModelProperty(value = "更新时间")
-    private Timestamp updateTime;
-
-    @Column(name = "`status`",nullable = false)
+    @Column(name = "`message_source`",nullable = false)
     @NotBlank
-    @ApiModelProperty(value = "是否使用 Y/N")
-    private String status;
+    @ApiModelProperty(value = "消息来源")
+    private String messageSource;
 
-    @Column(name = "`use_id`")
-    @ApiModelProperty(value = "使用者id")
-    private Long useId;
-
-    @Column(name = "`type`",nullable = false)
-    @NotBlank
-    @ApiModelProperty(value = "卡密类型（积分，会员）")
-    private String type;
-
-    @Column(name = "`number`",nullable = false)
-    @NotNull
-    @ApiModelProperty(value = "兑换数量")
-    private Integer number;
-
-    public void copy(UserKami source){
+    public void copy(ChatMessage source){
         BeanUtil.copyProperties(source,this, CopyOptions.create().setIgnoreNullValue(true));
     }
 }

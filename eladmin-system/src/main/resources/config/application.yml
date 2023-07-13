@@ -22,15 +22,15 @@ spring:
     open-in-view: true
     properties:
       hibernate:
-#        show_sql: true
+        show_sql: true
         dialect: org.hibernate.dialect.MySQL5InnoDBDialect
 
   redis:
     #数据库索引
     database: ${REDIS_DB:0}
-    host: ${REDIS_HOST:47.94.237.159}
+    host: ${REDIS_HOST:127.0.0.1}
     port: ${REDIS_PORT:6379}
-    password: ${REDIS_PWD:123456}
+    password: ${REDIS_PWD:}
     #连接超时时间
     timeout: 5000
 

@@ -45,7 +45,7 @@ public class VerifyServiceImpl implements VerifyService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public EmailVo sendEmail(String email, String key, String description,String code) {
+    public EmailVo sendEmailCode(String email, String key, String description,String code) {
         EmailVo emailVo;
         String content;
         String redisKey = key + email;
@@ -66,6 +66,16 @@ public class VerifyServiceImpl implements VerifyService {
             emailVo = new EmailVo(Collections.singletonList(email),"ChatGpt-Web",content);
         }
         return emailVo;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public EmailVo sendEmail(String email, String key, String description,String txt) {
+        // 如果不存在有效的验证码，就创建一个新的
+        TemplateEngine engine = TemplateUtil.createEngine(new TemplateConfig("template", TemplateConfig.ResourceMode.CLASSPATH));
+        Template template = engine.getTemplate("email/email.ftl");
+        String content = template.render(Dict.create().set("code",txt).set("title",description));
+        return new EmailVo(Collections.singletonList(email),"ChatGpt-Web",content);
     }
 
     @Override
