@@ -1,6 +1,5 @@
 package me.zhengjie.utils;
 
-import io.swagger.models.auth.In;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -10,8 +9,6 @@ import lombok.NoArgsConstructor;
  * @DateTime: 2023/7/29 11:08
  **/
 @Data
-@AllArgsConstructor
-@NoArgsConstructor
 public class XUpdateResult {
     private Integer Code;
     private String Msg;
