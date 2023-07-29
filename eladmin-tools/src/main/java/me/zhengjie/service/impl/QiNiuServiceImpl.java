@@ -104,9 +104,9 @@ public class QiNiuServiceImpl implements QiNiuService {
         Configuration cfg = new Configuration(QiNiuUtil.getRegion(qiniuConfig.getZone()));
         UploadManager uploadManager = new UploadManager(cfg);
         Auth auth = Auth.create(qiniuConfig.getAccessKey(), qiniuConfig.getSecretKey());
-        String upToken = auth.uploadToken(qiniuConfig.getBucket());
+        String key = file.getOriginalFilename();
+        String upToken = auth.uploadToken(qiniuConfig.getBucket(),key);
         try {
-            String key = file.getOriginalFilename();
             if(qiniuContentRepository.findByKey(key) != null) {
                 key = QiNiuUtil.getKey(key);
             }
