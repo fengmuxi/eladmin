@@ -4,8 +4,6 @@ package me.zhengjie.modules.system.service.impl;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.ObjectUtil;
-import com.github.pagehelper.Page;
-import com.github.pagehelper.PageHelper;
 import lombok.RequiredArgsConstructor;
 import me.zhengjie.modules.system.domain.PageData;
 import me.zhengjie.modules.system.utils.DateUtils;
@@ -76,11 +74,11 @@ public class UpdateServiceImpl implements UpdateService {
     public PageData<AppVersionInfo> getAllAppVersionInfo(int pageNum, int pageSize) {
         //将参数传给这个方法就可以实现物理分页了，非常简单。
         PageData<AppVersionInfo> pageData = new PageData<>();
-        Page<AppVersionInfo> page = PageHelper.startPage(pageNum, pageSize);
-        pageData.setArray(appVersionInfoMapper.findAll());
-        pageData.setPageNum(page.getPageNum())
-                .setPageSize(page.getPageSize())
-                .setTotal(page.getTotal());
+        List<AppVersionInfo> all = appVersionInfoMapper.findAll();
+        pageData.setArray(all);
+        pageData.setPageNum(pageNum)
+                .setPageSize(pageSize)
+                .setTotal(all.size());
         return pageData;
     }
 

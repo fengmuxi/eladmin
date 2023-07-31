@@ -79,6 +79,21 @@ public class DictDetailServiceImpl implements DictDetailService {
         return dictDetailMapper.toDto(dictDetailRepository.findByDictName(name));
     }
 
+    /**
+     * 查询公告
+     *
+     * @author: xdf
+     * @date: 2023/7/31 18:51
+     * @Param []
+     * @return java.lang.Object
+     **/
+    @Override
+    @Cacheable(key = "'notice:'")
+    public String queryNoticeDictDetail() {
+        DictDetail dictDetail = dictDetailRepository.findByDictName("notice").get(0);
+        return dictDetail.getValue();
+    }
+
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void delete(Long id) {

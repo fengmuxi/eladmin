@@ -60,4 +60,14 @@ public interface DictDetailService {
      * @return /
      */
     List<DictDetailDto> getDictByName(String name);
+
+    /**
+     * 查询公告
+     *
+     * @author: xdf
+     * @date: 2023/7/31 18:51
+     * @Param []
+     * @return java.lang.Object
+     **/
+    String queryNoticeDictDetail();
 }

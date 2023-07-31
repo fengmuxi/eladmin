@@ -19,6 +19,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import me.zhengjie.annotation.Log;
+import me.zhengjie.annotation.rest.AnonymousGetMapping;
 import me.zhengjie.exception.BadRequestException;
 import me.zhengjie.modules.system.domain.DictDetail;
 import me.zhengjie.modules.system.service.DictDetailService;
@@ -95,5 +96,11 @@ public class DictDetailController {
     public ResponseEntity<Object> deleteDictDetail(@PathVariable Long id){
         dictDetailService.delete(id);
         return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @ApiOperation("查询公告")
+    @AnonymousGetMapping("/notice")
+    public ResponseEntity<Object> queryNoticeDictDetail(){
+        return new ResponseEntity<>(dictDetailService.queryNoticeDictDetail(),HttpStatus.OK);
     }
 }
